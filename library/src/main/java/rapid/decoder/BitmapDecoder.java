@@ -25,7 +25,6 @@ import android.widget.ImageView;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileDescriptor;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -42,7 +41,8 @@ import rapid.decoder.frame.AspectRatioCalculator;
 import rapid.decoder.frame.FramedDecoder;
 import rapid.decoder.frame.FramingMethod;
 
-import static rapid.decoder.cache.ResourcePool.*;
+import static rapid.decoder.cache.ResourcePool.POINT;
+import static rapid.decoder.cache.ResourcePool.RECT;
 
 public abstract class BitmapDecoder extends Decodable {
     static final String MESSAGE_INVALID_RATIO = "Ratio should be positive.";
@@ -881,18 +881,7 @@ public abstract class BitmapDecoder extends Decodable {
                     throw new IllegalArgumentException(MESSAGE_URI_REQUIRES_CONTEXT);
                 }
                 final ContentResolver cr = context.getContentResolver();
-                StreamBitmapLoader d = new StreamBitmapLoader(new LazyInputStream(new StreamOpener() {
-                    @Nullable
-                    @Override
-                    public InputStream openInputStream() {
-                        try {
-                            return cr.openInputStream(uri);
-                        } catch (FileNotFoundException e) {
-                            return null;
-                        }
-                    }
-                }));
-                return d.id(uri).useMemoryCache(useCache);
+                return new UriBitmapLoader(cr, uri).useMemoryCache(useCache);
             }
         }
     }
